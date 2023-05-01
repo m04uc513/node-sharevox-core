@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Text-to-Speech</title>
+  </head>
+  <body>
+    <h3>Text-to-Speech</h3>
+    <select id="speakers"></select>
+    <br/>
+    <input type="text" id="input-text" maxlength="50" size="50"></input>
+    <button onclick="submitText()">Submit</button>
+    <br /><br />
+    <audio id="audio-player"></audio>
+    <script>
+      const selectElement = document.getElementById("speakers");
+
+      window.onload = async function() {
+        const response = await fetch('/metas');
+        const data = await response.json();
+        const speakers = JSON.parse(data.message);
+        //console.log('# '+speakers.length+' charactors');
+        for (var i = 0; i < speakers.length; i++) {
+          for (var j = 0; j < speakers[i].styles.length; j++) {
+            const newOption = document.createElement("option");
+            newOption.value = speakers[i].styles[j].id;
+            newOption.textContent = 
+              speakers[i].name+'（'+
+              speakers[i].styles[j].name+'）';
+            selectElement.appendChild(newOption);
+          }
+        }
+        selectElement.value = 4;  // つくよみちゃん
+      }
+
+      async function submitText() {
+        const selectedOptionIndex = selectElement.selectedIndex;
+        const selectedOption = selectElement.options[selectedOptionIndex];
+        const id = selectedOption.value;
+        //console.log('# '+selectedValue+' selected');
+        const text = document.getElementById("input-text").value;
+        //console.log("### submitText（"+text+")");
+        const response = await fetch("/texttospeach", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text, id }),
+        });
+        const blob = await response.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        const audioPlayer = document.getElementById("audio-player");
+        audioPlayer.src = audioUrl;
+        audioPlayer.play();
+      }
+    </script>
+  </body>
+</html>
