@@ -6,7 +6,8 @@
       "cflags_cc!": [ "-fno-exceptions" ],
       "sources": [ "addon.cpp" ],
       "include_dirs": [
-        "<!@(node -p \"require('node-addon-api').include\")"
+        "<!@(node -p \"require('node-addon-api').include\")",
+        "<(module_root_dir)/lib"
       ],
       "libraries": [
         "<(module_root_dir)/lib/libcore.so",
